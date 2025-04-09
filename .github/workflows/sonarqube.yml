@@ -1,36 +1,39 @@
-name: Build, Test and SonarQube Analysis
+name: SonarQube Analysis
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches:
+      - master  # Ajusta según tu rama principal
 
 jobs:
-  build:
+  sonar:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
-        distribution: 'temurin'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Build and test
-      env:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5436/clinic_test
-        SPRING_DATASOURCE_USERNAME: test_user
-        SPRING_DATASOURCE_PASSWORD: test_password
-      run: |
-        mvn -B verify
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: SonarQube Scan
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      run: |
-        mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar -Dsonar.projectKey=Github-Test
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=src --cov-report=xml  # Ajusta la ruta a tu código
+
+      - name: Run SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=proyecto-python \
+            -Dsonar.organization=tu-org \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.python.version=3.10 \
+            -Dsonar.coverageReportPaths=coverage.xml
