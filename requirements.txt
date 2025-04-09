@@ -1,10 +1,10 @@
 click==6.7
-Flask==0.12.2
 itsdangerous==0.24
-Jinja2>=3.0.0
-MarkupSafe>=2.0.0
 py==1.4.34
 pytest==3.2.1
 Werkzeug==0.12.2
-pytest
-pytest-cov
+Flask>=2.0.0
+Jinja2>=3.0.0
+MarkupSafe>=2.0.0
+pytest>=7.0.0
+pytest-cov>=4.0.0
